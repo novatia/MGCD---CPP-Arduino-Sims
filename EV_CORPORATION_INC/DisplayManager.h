@@ -24,8 +24,21 @@ namespace EVCorporation
 			void printUserPINPage(char* PIN);
 			void printUserMenuPage();
 			void printNoDataPage();
+			void printPINErrorPage();
 			void printAdminPINPage(char* PIN);
 			void printAdminMenuPage();
+			
+			void printBIOActivateChipPage(char* CloneID);
+			void printBIOActivatePage();
+			void printBIOActivatingPage();
+			void printBIOActivatingErrorPage();
+			
+			void printBIODeactivateChipPage(char* CloneID);
+			void printBIODeactivatePage();
+			void printBIODeactivationSuccessPage();
+
+			void printBIOAllDeactivationSuccessPage();
+
 			void drawKeys();
 	};
 }

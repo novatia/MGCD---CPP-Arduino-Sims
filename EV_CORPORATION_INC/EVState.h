@@ -2,6 +2,7 @@
 #include "DisplayManager.h"
 
 #define STATE_TIME_OUT_MS 10000
+#define SHORT_STATE_TIME_OUT_MS 4000
 
 namespace EVCorporation
 {

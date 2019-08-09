@@ -1,19 +1,15 @@
 #include <UTFT.h>
 #include <Keypad.h>
 
-
 #include "InputManager.h"
 #include "Start_State.h"
-
 
 using namespace EVCorporation;
 using namespace EVStates;
 
-
-
-
-extern uint8_t BigFont[];
-UTFT ITDB02_28(ITDB28,38,39,40,41); //needed to be injected because of heap problems with the library loaded dinamically
+#define BLUE_PIN  11
+#define GREEN_PIN 12
+#define RED_PIN   13
 
 
 
@@ -31,9 +27,15 @@ byte colPins[COLS] = {42, 44, 46, 48}; //connect to the column pinouts of the ke
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
 
+
 DisplayManager* m_DisplayManager;
 InputManager*   m_InputManager;
 EVState* m_CurrentState;
+
+
+extern uint8_t BigFont[];
+UTFT ITDB02_28(ITDB28,38,39,40,41); //needed to be injected because of heap problems with the library loaded dinamically
+
 
 void setup() 
 {
@@ -51,8 +53,9 @@ void setup()
 
   m_CurrentState = new Start_State(millis());
 }
+
 void loop() 
 {
    m_InputManager->loop(); //read digit
-   m_CurrentState = m_CurrentState->loop(); //update state
+   m_CurrentState =  m_CurrentState->loop();;
 }

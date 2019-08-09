@@ -1,38 +1,38 @@
 #include "InputManager.h"
 
-#include "AdminMenu_State.h"
-#include "BIOActivateChip_State.h"
 #include "BIOActivate_State.h"
+#include "BIOActivating_State.h"
 
 namespace EVCorporation
 {
 	namespace EVStates
 	{
-		AdminMenu_State::AdminMenu_State(EVState* previous_state, unsigned long state_entry_time): EVState( previous_state, state_entry_time) {
+		BIOActivate_State::BIOActivate_State(EVState* previous_state, unsigned long state_entry_time): EVState( previous_state, state_entry_time) {
 			
 		}
 		
-		EVState* AdminMenu_State::loop()
+		EVState* BIOActivate_State::loop()
 		{
-			GetDisplay()->printAdminMenuPage();
+			GetDisplay()->printBIOActivatePage();
 			
 			InputManager* IM = InputManager::GetInstance();
 			char button_pressed = IM->GetButtonPressed();
 			
 			if ( button_pressed )
 			{
+				//yes
 				if (button_pressed == '1' )
 				{
 					GetDisplay()->clear();
 					delete GetPreviousState();
-					return new BIOActivateChip_State(this,millis(), new BIOActivate_State(this,millis() ) );
+					return new BIOActivating_State(this,millis());
 				}
 
-				if (button_pressed == '2')
+				//no
+				if (button_pressed == '0')
 				{
 					GetDisplay()->clear();
-					delete GetPreviousState();
-					return nullptr;
+					return GetPreviousState();
 				}
 				
 			}

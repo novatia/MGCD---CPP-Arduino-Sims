@@ -12,10 +12,10 @@ namespace EVCorporation
 		{
 			GetDisplay()->printNoDataPage();
 			
-			if ( millis()-GetStateEntryTime() > 4000 )
+			if ( millis()-GetStateEntryTime() > SHORT_STATE_TIME_OUT_MS )
 			{
+				GetDisplay()->clear();
 				return GetPreviousState();
-				
 			}
 			return this;
 		}

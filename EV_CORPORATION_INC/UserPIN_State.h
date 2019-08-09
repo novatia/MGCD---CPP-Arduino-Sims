@@ -20,6 +20,7 @@ namespace EVCorporation
 				int m_PINIndex=0;
 				int m_ErrorCount = 0;
 				unsigned long m_CurrentTS;
+				bool m_ResetTS;
 			public:
 				EVState* loop();
 				UserPIN_State(EVState* previous_state, unsigned long state_entry_time);

@@ -20,6 +20,7 @@ namespace EVCorporation
 		EVState* Start_State::loop()
 		{
 			GetDisplay()->printStartPage();
+			
 			InputManager* IM = InputManager::GetInstance();
 			char button_pressed = IM->GetButtonPressed();
 				

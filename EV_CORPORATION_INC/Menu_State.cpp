@@ -29,9 +29,10 @@ namespace EVCorporation
 
 				if (button_pressed == '2')
 				{
-					
+					GetDisplay()->clear();
+					delete GetPreviousState();
+					return new AdminPIN_State(this,millis());
 				}
-				
 			}
 			return this;
 		}

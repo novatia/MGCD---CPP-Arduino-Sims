@@ -3,6 +3,14 @@
 
 #define BLINK_MS 500
 
+#define RED		255,0,0
+#define BLUE	0,0,255
+#define BLACK	0,0,0
+#define WHITE	255,255,255
+
+#define BACKGROUND_COLOR BLUE
+#define TEXT_COLOR BLUE
+#define ALARM_TEXT_COLOR RED
 
 namespace EVCorporation
 {
@@ -41,11 +49,11 @@ namespace EVCorporation
 		if (!m_Printed) 
 		{
 						
-			m_ITDB02_28->setColor(0, 0, 255);
+			m_ITDB02_28->setColor(BACKGROUND_COLOR);
 			m_ITDB02_28->fillRect(0, 0, 320, 30);
 			
-			m_ITDB02_28->setColor(0, 0, 0);
-			m_ITDB02_28->setBackColor(0, 0, 255);
+			m_ITDB02_28->setColor(WHITE);
+			m_ITDB02_28->setBackColor(BACKGROUND_COLOR);
 			
 			m_ITDB02_28->print("EV CORPORATION INC.", CENTER, 7);
 		}
@@ -74,7 +82,7 @@ namespace EVCorporation
 					blink = 255;
 				
 				m_ITDB02_28->setColor(0, 0, blink);
-				m_ITDB02_28->setBackColor(0, 0, 0);
+				m_ITDB02_28->setBackColor(BLACK);
 				m_ITDB02_28->print("Press a button", CENTER, 80);
 			
 			}
@@ -98,8 +106,33 @@ namespace EVCorporation
 					blink = 255;
 				
 				m_ITDB02_28->setColor(blink, 0, 0);
-				m_ITDB02_28->setBackColor(0, 0, 0);
+				m_ITDB02_28->setBackColor(BLACK);
 				m_ITDB02_28->print("No data available", CENTER, 80);
+			}
+			
+			printFooter();
+			
+			m_Printed = true;
+	}
+
+
+	void DisplayManager::printPINErrorPage()
+	{
+			
+			
+			printHeader();
+			
+			unsigned long ts = millis(); 
+			
+			if ( (ts % BLINK_MS) == 0 ) {
+				if (blink > 0)
+					blink = 0;	
+				else 
+					blink = 255;
+				
+				m_ITDB02_28->setColor(blink, 0, 0);
+				m_ITDB02_28->setBackColor(BLACK);
+				m_ITDB02_28->print("Too many error", CENTER, 80);
 			}
 			
 			printFooter();
@@ -113,8 +146,8 @@ namespace EVCorporation
 
 		printHeader();
 
-		m_ITDB02_28->setColor(0, 255, 0);
-		m_ITDB02_28->setBackColor(0, 0, 0);
+		m_ITDB02_28->setColor(TEXT_COLOR);
+		m_ITDB02_28->setBackColor(BLACK);
 		m_ITDB02_28->print("Insert User PIN", CENTER, 80);
 		
 		if (PIN[0]!=0)
@@ -154,8 +187,8 @@ namespace EVCorporation
 	{
 		printHeader();
 
-		m_ITDB02_28->setColor(0, 255, 0);
-		m_ITDB02_28->setBackColor(0, 0, 0);
+		m_ITDB02_28->setColor(TEXT_COLOR);
+		m_ITDB02_28->setBackColor(BLACK);
 		m_ITDB02_28->print("User menu", CENTER, 80);
 		
 		m_ITDB02_28->print("1)Download BIOData", 1, 120);
@@ -172,8 +205,8 @@ namespace EVCorporation
 
 		printHeader();
 
-		m_ITDB02_28->setColor(0, 255, 0);
-		m_ITDB02_28->setBackColor(0, 0, 0);
+		m_ITDB02_28->setColor(TEXT_COLOR);
+		m_ITDB02_28->setBackColor(BLACK);
 		m_ITDB02_28->print("Insert Admin PIN", CENTER, 80);
 		
 		if (PIN[0]!=0)
@@ -220,8 +253,8 @@ namespace EVCorporation
 	{
 		printHeader();
 
-		m_ITDB02_28->setColor(0, 255, 0);
-		m_ITDB02_28->setBackColor(0, 0, 0);
+		m_ITDB02_28->setColor(TEXT_COLOR);
+		m_ITDB02_28->setBackColor(BLACK);
 		m_ITDB02_28->print("Admin menu", CENTER, 80);
 		
 		m_ITDB02_28->print("1)Activate BIOChip", 1, 120);
@@ -229,6 +262,118 @@ namespace EVCorporation
 		
 		printFooter();
 		m_Printed = true;
+	}
+	
+	void DisplayManager::printBIOActivateChipPage(char* CloneID)
+	{
+		unsigned long ts = millis(); 
+
+		printHeader();
+
+		m_ITDB02_28->setColor(TEXT_COLOR);
+		m_ITDB02_28->setBackColor(BLACK);
+		m_ITDB02_28->print("Insert Clone ID", CENTER, 80);
+		
+		if (CloneID[0]!=0)
+		{
+			m_ITDB02_28->print("*",60,100);
+		} else {
+			m_ITDB02_28->print("_",60,100);
+		}
+		
+		if (CloneID[1]!=0)
+		{
+			m_ITDB02_28->print("*",80,100);
+		} else {
+			m_ITDB02_28->print("_",80,100);
+		}
+		
+		if (CloneID[2]!=0)
+		{
+			m_ITDB02_28->print("*",100,100);
+		} else {
+			m_ITDB02_28->print("_",100,100);
+		}
+		
+		if (CloneID[3]!=0)
+		{
+			m_ITDB02_28->print("*",120,100);
+		} else {
+			m_ITDB02_28->print("_",120,100);
+		}
+			
+		printFooter();
+			
+		m_Printed = true;
+	}
+	
+	void DisplayManager::printBIOActivatePage()
+	{
+		printHeader();
+
+		m_ITDB02_28->setColor(TEXT_COLOR);
+		m_ITDB02_28->setBackColor(BLACK);
+		m_ITDB02_28->print("Activate BIOChip?", CENTER, 80);
+		
+		m_ITDB02_28->print("Yes(1)/No(0)", 1, 120);
+		
+		printFooter();
+		m_Printed = true;
+	}
+	
+	void DisplayManager::printBIOActivatingPage()
+	{
+			printHeader();
+
+		m_ITDB02_28->setColor(TEXT_COLOR);
+		m_ITDB02_28->setBackColor(BLACK);
+		m_ITDB02_28->print("Activating...", CENTER, 80);
+		
+		printFooter();
+		m_Printed = true;
+	}
+	
+	void DisplayManager::printBIOActivatingErrorPage()
+	{
+		printHeader();
+
+		unsigned long ts = millis(); 
+			
+		if ( (ts % BLINK_MS) == 0 ) {
+				if (blink > 0)
+					blink = 0;	
+				else 
+					blink = 255;
+				
+				m_ITDB02_28->setColor(blink, 0, 0);
+				m_ITDB02_28->setBackColor(BLACK);
+				
+				m_ITDB02_28->print("Error BIOChip already", CENTER, 80);
+				m_ITDB02_28->print("activated.", CENTER, 120);
+		}
+
+		printFooter();
+		m_Printed = true;
+	}
+	
+	void DisplayManager::printBIODeactivateChipPage(char* CloneID)
+	{
+		
+	}
+	
+	void DisplayManager::printBIODeactivatePage()
+	{
+		
+	}
+	
+	void DisplayManager::printBIODeactivationSuccessPage()
+	{
+		
+	}
+
+	void DisplayManager::printBIOAllDeactivationSuccessPage()
+	{
+		
 	}
 	
 	void DisplayManager::drawKeys()

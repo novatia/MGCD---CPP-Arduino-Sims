@@ -24,6 +24,9 @@ namespace EVCorporation
 		
 		EVState* UserPIN_State::loop()
 		{
+			if (m_ResetTS)
+				m_CurrentTS = millis();
+			
 			GetDisplay()->printUserPINPage(m_UserPIN);
 			
 			InputManager* IM = InputManager::GetInstance();
@@ -48,23 +51,24 @@ namespace EVCorporation
 					}
 					else
 					{
-						Serial.println("CLEAR");
 						ClearPIN();
 						m_ErrorCount++;
+						
 						if (m_ErrorCount>2)
 						{
+							m_ResetTS = true;
+							m_ErrorCount = 0;
 							GetDisplay()->clear();
-							delete GetPreviousState();
 							return new Blocked_State(this,millis());
 						}
 					}
 				}
 			}
 		
-			if ( millis() - m_CurrentTS >= STATE_TIME_OUT_MS ) {
+			if ( millis() - m_CurrentTS >= STATE_TIME_OUT_MS )
+			{
 				GetDisplay()->clear();
-				delete GetPreviousState();
-				return new Start_State(this,millis());
+				return GetPreviousState();
 			}
 			
 			return this;
