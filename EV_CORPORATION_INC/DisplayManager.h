@@ -3,12 +3,17 @@
 
 namespace EVCorporation
 {
-	class DisplayManager {
+	class DisplayManager 
+	{
 		private:
-
+			unsigned int m_Blink = 255;
+			
 			static DisplayManager* m_Instance;
 			UTFT* m_ITDB02_28;
-			bool m_Printed;
+			
+			bool m_PrintedBody;
+			bool m_PrintedHeader;
+			bool m_PrintedFooter;
 			
 			DisplayManager();
 			void printHeader();
@@ -19,26 +24,10 @@ namespace EVCorporation
 
 			void setup( UTFT* ITDB02_28 );
 			void clear();
-						
-			void printStartPage();
-			void printUserPINPage(char* PIN);
-			void printUserMenuPage();
-			void printNoDataPage();
-			void printPINErrorPage();
-			void printAdminPINPage(char* PIN);
-			void printAdminMenuPage();
 			
-			void printBIOActivateChipPage(char* CloneID);
-			void printBIOActivatePage();
-			void printBIOActivatingPage();
-			void printBIOActivatingErrorPage();
+			void printTextNTOPage(const char* message, bool blink);
+			void printPINPage(char *message, char* PIN, unsigned short int PIN_len);
+			void printUserMenuPage(char *message, char **choices, unsigned short int choices_count  );
 			
-			void printBIODeactivateChipPage(char* CloneID);
-			void printBIODeactivatePage();
-			void printBIODeactivationSuccessPage();
-
-			void printBIOAllDeactivationSuccessPage();
-
-			void drawKeys();
 	};
 }

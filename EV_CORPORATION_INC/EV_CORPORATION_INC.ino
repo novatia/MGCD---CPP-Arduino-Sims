@@ -1,8 +1,9 @@
 #include <UTFT.h>
 #include <Keypad.h>
 
-#include "InputManager.h"
-#include "Start_State.h"
+#include "TextNTO_State.h"
+#include "PIN_State.h"
+#include "Menu_State.h"
 
 using namespace EVCorporation;
 using namespace EVStates;
@@ -11,51 +12,85 @@ using namespace EVStates;
 #define GREEN_PIN 12
 #define RED_PIN   13
 
-
+extern uint8_t BigFont[];
+UTFT ITDB02_28(ITDB28,38,39,40,41); //needed to be injected because of heap problems with the library loaded dinamically
 
 const byte ROWS = 4; //four rows
 const byte COLS = 4; //three columns
+
 char keys[ROWS][COLS] = {
-  {'1','2','3','A'},
-  {'4','5','6','B'},
-  {'7','8','9','C'},
-  {'*','0','#','D'}
+  {'1','4','7','*'},
+  {'2','5','8','0'},
+  {'3','6','9','#'},
+  {'A','B','C','D'}
 };
-byte rowPins[ROWS] = {43, 45, 47, 49}; //connect to the row pinouts of the keypad
-byte colPins[COLS] = {42, 44, 46, 48}; //connect to the column pinouts of the keypad
+
+byte rowPins[ROWS] = {49, 47, 45, 43}; //connect to the row pinouts of the keypad
+byte colPins[COLS] = {48, 46, 44, 42}; //connect to the column pinouts of the keypad
 
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 
-
+const char *press_a_button = "Press a button";
 
 DisplayManager* m_DisplayManager;
-InputManager*   m_InputManager;
+
 EVState* m_CurrentState;
-
-
-extern uint8_t BigFont[];
-UTFT ITDB02_28(ITDB28,38,39,40,41); //needed to be injected because of heap problems with the library loaded dinamically
 
 
 void setup() 
 {
-  Serial.begin(9600);
+    Serial.begin(9600);
+    
+    ITDB02_28.InitLCD();
+    ITDB02_28.setFont(BigFont);
+    ITDB02_28.clrScr();
+ 
+    m_DisplayManager = DisplayManager::GetInstance();
+    m_DisplayManager->setup(&ITDB02_28);
   
-  ITDB02_28.InitLCD();
-  ITDB02_28.setFont(BigFont);
-  ITDB02_28.clrScr();
+    Serial.println("GOTO TextNTO_State");
+  
+    const char* UserPIN = "3845";
+    const char* AdminPIN= "16245";
+    const char* UserPINMessage =  "Insert user PIN";
+    const char* AdminPINMessage = "Insert admin PIN";
+    const char* UserMenuMessage = "User menu";
+    const char* NoDataMessage = "*** No data ***";
+    const char* AdminMenuMessage = "Admin menu";
 
-  m_DisplayManager = DisplayManager::GetInstance();
-  m_DisplayManager->setup(&ITDB02_28);
-
-  m_InputManager = InputManager::GetInstance();
-  m_InputManager->setup(&keypad);
-
-  m_CurrentState = new Start_State(millis());
+    EVState* AdminMenu[2];
+    
+    const char AdminMenuKeys[3] = {'1','2'};
+    const char* AdminMenuChoices[3] = {"1)Activate BIOChip","2)Detach BIOChip"};
+    
+    EVState* admin_menu_state     =  new Menu_State(&keypad, nullptr, AdminMenu, AdminMenuChoices, AdminMenuKeys, 2, AdminMenuMessage,11, millis());
+    
+    EVState* admin_pin_state =  new PIN_State(&keypad, nullptr, admin_menu_state, AdminPINMessage,17,AdminPIN,5,millis());
+    
+    EVState* user_menu_1 =   new TextNTO_State(&keypad, nullptr, nullptr, millis(), NoDataMessage, 16, 4, true, false);
+  
+    EVState* UserMenu[3];
+    const char UserMenuKeys[3] = {'1','2','3'};
+    const char* MenuChoices[3] = {"1)Download BIOData","2)Manage BIOChip","3)Show BIOData"};
+    
+    UserMenu[0] = user_menu_1;
+    UserMenu[1] = admin_pin_state;
+    UserMenu[2] = user_menu_1;
+        
+    EVState* menu_state     =  new Menu_State(&keypad, nullptr, UserMenu, MenuChoices, UserMenuKeys, 3, UserMenuMessage,10, millis());
+    
+    user_menu_1->SetPreviousState(menu_state);
+    admin_pin_state->SetPreviousState(menu_state);
+    
+    EVState* user_pin_state =  new PIN_State(&keypad, nullptr, menu_state, UserPINMessage,16,UserPIN,4,millis());
+    EVState* start_state    =  new TextNTO_State(&keypad, nullptr, user_pin_state, millis(), press_a_button, 15, 0, true, true);
+    
+    user_pin_state->SetPreviousState(start_state);
+    
+    m_CurrentState = start_state;
 }
 
 void loop() 
 {
-   m_InputManager->loop(); //read digit
-   m_CurrentState =  m_CurrentState->loop();;
+     m_CurrentState =  m_CurrentState->loop();
 }

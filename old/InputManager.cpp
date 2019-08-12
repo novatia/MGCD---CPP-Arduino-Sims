@@ -33,11 +33,10 @@ namespace EVCorporation
 	
 	void InputManager::loop()
 	{
-		if (! m_Digit)
-		{
-			m_Digit = m_Keypad->getKey();
-		}
-		else	
-			m_Digit = 0;	
+		m_Digit = m_Keypad->getKey();
+		
+		if (m_Digit!=0)
+			Serial.println(m_Digit);
+		
 	}
 }
