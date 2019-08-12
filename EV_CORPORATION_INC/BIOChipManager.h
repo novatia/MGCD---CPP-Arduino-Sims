@@ -5,7 +5,7 @@ namespace EVCorporation
 	class BIOChipManager 
 	{
 		private:
-			char m_BIOChips[4];
+			const char *m_BIOChips[4];
 			bool m_Enabled[4];
 			
 			static BIOChipManager* m_Instance;
@@ -13,10 +13,11 @@ namespace EVCorporation
 			BIOChipManager();
 
 		public:
-			static DisplayManager* GetInstance();
+			static BIOChipManager* GetInstance();
 			bool DisableBIOChip(char *PIN);
 			bool EnableBIOChip(char *PIN);
 			void resetBIOChips();
-			
+			bool CheckBIOChipPIN(char *PIN);
+			short int GetBIOChipPINIndex(char *PIN);
 	};
 }

@@ -1,9 +1,12 @@
 #include <UTFT.h>
 #include <Keypad.h>
 
+#include "BIOChipManager.h"
+
 #include "TextNTO_State.h"
 #include "PIN_State.h"
 #include "Menu_State.h"
+#include "BIOChipON_State.h"
 
 using namespace EVCorporation;
 using namespace EVStates;
@@ -33,6 +36,7 @@ Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
 const char *press_a_button = "Press a button";
 
 DisplayManager* m_DisplayManager;
+BIOChipManager* m_BIOChipManager;
 
 EVState* m_CurrentState;
 
@@ -58,12 +62,22 @@ void setup()
     const char* NoDataMessage = "*** No data ***";
     const char* AdminMenuMessage = "Admin menu";
 
+    const char* BIOChipPINMessage = "Insert Clone ID";
+
+    
+    
+    EVState* BIOChipONState = new BIOChipON_State(&keypad, nullptr, nullptr, BIOChipPINMessage,16,4,millis());
+    
     EVState* AdminMenu[2];
     
     const char AdminMenuKeys[3] = {'1','2'};
     const char* AdminMenuChoices[3] = {"1)Activate BIOChip","2)Detach BIOChip"};
+    AdminMenu[0] = BIOChipONState;
+    AdminMenu[1] = nullptr;  //BIOChipOFFState;
     
     EVState* admin_menu_state     =  new Menu_State(&keypad, nullptr, AdminMenu, AdminMenuChoices, AdminMenuKeys, 2, AdminMenuMessage,11, millis());
+
+    BIOChipONState->SetPreviousState(admin_menu_state);
     
     EVState* admin_pin_state =  new PIN_State(&keypad, nullptr, admin_menu_state, AdminPINMessage,17,AdminPIN,5,millis());
     
