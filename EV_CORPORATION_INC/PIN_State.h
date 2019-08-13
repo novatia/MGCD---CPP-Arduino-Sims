@@ -20,9 +20,7 @@ namespace EVCorporation
 				char *m_UserPIN;
 				char *m_Message;
 
-        bool m_EnableLoader;
-        bool m_EnableLED;
-        
+       
        
 				unsigned short int m_PIN_len;
 				unsigned short int m_PINIndex   = 0;
@@ -38,8 +36,6 @@ namespace EVCorporation
 				~PIN_State();
 				void ClearPIN();
 
-        void SetLoader();
-        void SetLED();
 		};
 	}
 }

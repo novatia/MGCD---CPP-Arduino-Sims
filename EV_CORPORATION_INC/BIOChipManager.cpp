@@ -3,7 +3,7 @@
 namespace EVCorporation
 {
 	BIOChipManager* BIOChipManager::m_Instance;
-		
+		 
 	BIOChipManager::BIOChipManager()
 	{
     m_BIOChips[0][0] = 0;
@@ -90,7 +90,7 @@ namespace EVCorporation
 	
 	short int BIOChipManager::GetBIOChipPINIndex(char *PIN)
 	{
-		short int index = -1;
+		short int index = 0;
 		
 		for (int i = 0; i<CHIPS; i++)
 		{
@@ -104,7 +104,7 @@ namespace EVCorporation
 			}
 			
       if ( index >= 0 )
-        break;
+          break;
 		}
 		
 		return index;

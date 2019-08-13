@@ -140,5 +140,100 @@ namespace EVCorporation
 		{
 			return m_NextStatesLen;
 		}
+
+   
+    void EVState::SetLED(TextColors color) {
+          m_EnableLED=true;
+          m_LEDColor = color;
+          m_LEDBlink = false;
+    }
+
+    void EVState::SetLED(TextColors color,bool blink) {
+          m_EnableLED=true;
+          m_LEDColor = color;
+          m_LEDBlink = blink;
+    }
+    
+    void EVState::SetLoader(){
+          m_EnableLoader=true;
+    }
+
+    bool EVState::HasLoader()
+    {
+      return m_EnableLoader;
+    }
+    
+    bool EVState::HasLED()
+    {
+      return m_EnableLED; 
+    }
+
+    void EVState::SetLEDColor()
+    {
+      if (!HasLED())
+        return; 
+
+      if ( m_LEDBlink )
+      {
+        if ( millis() - m_LED_blink_ts > LED_BLINK_TICK )
+        {
+          m_LED_blink_ts = millis();
+          m_LED_value--;
+          
+          if (m_LED_value==0)
+            m_LED_value = 255;
+        }
+      }
+      else 
+      {
+        m_LED_value = 0;
+      }
+      
+      if (m_LEDColor == TextColors::Red)
+      {
+        analogWrite(BLUE_PIN,255);
+        analogWrite(GREEN_PIN,255);
+        analogWrite(RED_PIN,m_LED_value);
+      }
+      
+
+      if (m_LEDColor == TextColors::Green)
+      {
+        analogWrite(BLUE_PIN,255);
+        analogWrite(GREEN_PIN,m_LED_value);
+        analogWrite(RED_PIN,255); 
+      }
+
+      if (m_LEDColor == TextColors::Blue)
+      {
+        analogWrite(BLUE_PIN,m_LED_value);
+        analogWrite(GREEN_PIN,255);
+        analogWrite(RED_PIN,255); 
+      }
+
+      if (m_LEDColor == TextColors::White)
+      {
+        analogWrite(BLUE_PIN,m_LED_value);
+        analogWrite(GREEN_PIN,m_LED_value);
+        analogWrite(RED_PIN,m_LED_value); 
+      }
+
+      if (m_LEDColor == TextColors::Black)
+      {
+        analogWrite(BLUE_PIN,255);
+        analogWrite(GREEN_PIN,255);
+        analogWrite(RED_PIN,255); 
+      }
+
+    }
+    
+    void EVState::SetTextColor(TextColors color){
+      m_TextColor =color;
+     
+     }
+    
+     TextColors EVState::GetTextColor(){
+      return m_TextColor;
+     }
 	}
 }

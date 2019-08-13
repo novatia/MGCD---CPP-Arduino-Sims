@@ -13,13 +13,13 @@ namespace EVCorporation
 				unsigned short int m_MessageLenght;
 				unsigned short int m_TimeOut;
 				
-				bool m_Blink;
-				bool m_PressButton;
+				bool m_Blink = false;
+				bool m_PressButton = false;
 				char m_CloneID[4];
-				bool m_Disable;
+				bool m_Disable = false;
 				const char *m_AllDetached = "All ID detached!Rebooting...";
 				EVState* m_AllDetachedState;
-       EVState* m_ResetState;
+        EVState* m_ResetState;
       
 				
 			public:

@@ -37,18 +37,20 @@ namespace EVCorporation
 			m_PressButton = press_button;
 
 			m_ResetState = new Reset_State();
-    
+      m_ResetState->SetLoader();
+      
 			m_AllDetachedState = new TextNTO_State(keypad, m_ResetState, nullptr, 0, m_AllDetached, 29, 30, false, true);
+      m_AllDetachedState->SetLoader();
 		}
    
-		
 		EVState* BIOChipDetached_State::loop()
 		{
-			GetDisplay()->printTextNTOPage( m_Message, m_Blink );
+      SetLEDColor();
+      GetDisplay()->SetTextColor(GetTextColor());
+      GetDisplay()->printTextNTOPage( m_Message, m_Blink );
 			
 			if ( m_TimeOut != 0 )
 			{
-				
 				if ( millis() - GetStateCreationTimestamp() > m_TimeOut * 1000 )
 				{
            m_Disable = true;
@@ -65,36 +67,35 @@ namespace EVCorporation
 				}
 			}
 
-      if (m_Disable)
+      if ( m_Disable )
       {
             BIOChipManager* BIOM = BIOChipManager::GetInstance();
             
-            Serial.println(BIOM->IsEnabled(m_CloneID));
             BIOM->DisableBIOChip(m_CloneID);
-            Serial.println(BIOM->IsEnabled(m_CloneID));
-            Serial.println(BIOM->AllDisabled());
-           
+          
             if ( BIOM->AllDisabled() )
             {
                 Serial.println("All detached... Game end.");
                 GetDisplay()->clear();
+                
                 m_AllDetachedState->SetStateCreationTimestamp(millis());
                 return m_AllDetachedState;
-            }                                                                                                     
+            }
             
             EVState* previous_state = GetPreviousState();
-           
             if ( previous_state == nullptr) 
             {
-              Serial.println("No previous state Setted");
-              return this;
+               return this;
             }
+            
             m_Disable = false;
-            previous_state->SetStateCreationTimestamp(millis());
+            
             GetDisplay()->clear();
+            
+            previous_state->SetStateCreationTimestamp(millis());
             return previous_state;
      }
-					
+
 			return this;
 		}
 	}

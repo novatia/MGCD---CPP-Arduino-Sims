@@ -1,19 +1,6 @@
 #include "KeysConstants.h"
 #include "DisplayManager.h"
 
-#define LOADER_TICK 500
-
-#define BLINK_MS 500
-
-#define RED		255,0,0
-#define BLUE	0,0,255
-#define BLACK	0,0,0
-#define WHITE	255,255,255
-
-#define BACKGROUND_COLOR BLUE
-#define TEXT_COLOR BLUE
-#define ALARM_TEXT_COLOR RED
-
 namespace EVCorporation
 {
 	DisplayManager* DisplayManager::m_Instance;
@@ -53,7 +40,7 @@ namespace EVCorporation
 		{
 			const char *title = "EV CORPORATION INC.";
 			m_ITDB02_28->setColor(BACKGROUND_COLOR);
-			m_ITDB02_28->fillRect(0, 0, 320, 30);
+			m_ITDB02_28->fillRect(0, 0, 319, 30);
 			
 			m_ITDB02_28->setColor(WHITE);
 			m_ITDB02_28->setBackColor(BACKGROUND_COLOR);
@@ -66,50 +53,59 @@ namespace EVCorporation
 
   unsigned int DisplayManager::GetProgress()
   {
-      return WIDTH_RESOLUTION * ( m_CurrentTime - m_CurrentStartTime ) / m_Timeout;
+      unsigned int progress =  WIDTH_RESOLUTION * ( m_CurrentTime - m_CurrentStartTime ) / m_Timeout;
+      if (progress>319)
+        progress = 319;
+      return progress;
   }
 
-  void DisplayManager::SetLoader(unsigned int time_out)
+  void DisplayManager::SetLoader(bool EnableLoader, unsigned int time_out)
   {
+      m_EnableLoader = EnableLoader;
+
+      if (!m_EnableLoader)
+        return;
+
       //main loop parameters
       m_Timeout  = time_out;
-      m_EnableLoader = true;
-     
       
       if ( m_CurrentStartTime == 0 )
       {
+        //first time entered set current start time to NOW and current tick to NOW
         m_CurrentStartTime = millis();
         m_CurrentTick = millis();
       }
-      
+
+      //update current time
       m_CurrentTime = millis();
   }
 
   void DisplayManager::ResetLoader()
   {
       Serial.println("Reset loader");
-      
-      m_CurrentStartTime = millis();
-      m_CurrentTime = m_CurrentStartTime;
-      m_CurrentTick = m_CurrentTime;
-      
       m_ITDB02_28->setColor(BLACK);
-      m_ITDB02_28->fillRect(0, 210, 320, 240);
+      m_ITDB02_28->fillRect(0, 210, 319, 239);
+      
+      //m_CurrentTime - m_CurrentStartTime
+      m_CurrentStartTime = 0;
+      m_CurrentTime = 0;
+      m_CurrentTick = 0;
   }
 
 	void DisplayManager::printFooter()
 	{	
 	  if ( m_EnableLoader )
     {
-        
+       
         if (  (m_CurrentTime - m_CurrentTick)  >= LOADER_TICK )
         {
+          //ticked greater then LOADER_TICK... update current tick
            m_CurrentTick = m_CurrentTime;
            m_LastProgress = GetProgress();
+          
            m_ITDB02_28->setColor(BACKGROUND_COLOR);
-           m_ITDB02_28->fillRect(0, 210, m_LastProgress, 240);
+           m_ITDB02_28->fillRect(0, 210, m_LastProgress, 239);
         }
-        
     }
     
 	  if ( !m_PrintedFooter ) 
@@ -156,7 +152,19 @@ namespace EVCorporation
 			
 			if ( !m_PrintedBody )
 			{
-				m_ITDB02_28->setColor(0, 0, m_Blink);
+      
+        if (m_TextColor == TextColors::Blue)
+				  m_ITDB02_28->setColor(0, 0, m_Blink);
+         
+        if (m_TextColor == TextColors::Red)
+          m_ITDB02_28->setColor(m_Blink, 0, 0);
+       
+        if (m_TextColor == TextColors::Green)
+          m_ITDB02_28->setColor(0, m_Blink, 0);
+        
+        if (m_TextColor == TextColors::White)
+          m_ITDB02_28->setColor(m_Blink, m_Blink, m_Blink);
+          
 				m_ITDB02_28->setBackColor(BLACK);
 				
 				if ( strlen(message) > 16 )
@@ -251,4 +259,9 @@ namespace EVCorporation
 			
 		printFooter();
 	}
+
+  void DisplayManager::SetTextColor(TextColors color){
+    m_TextColor = color;
+  }
+      
 }

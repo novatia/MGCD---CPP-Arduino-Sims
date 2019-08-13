@@ -2,6 +2,7 @@
 #include "TextNTO_State.h"
 #include "Menu_State.h"
 #include "BIOChipManager.h"
+#include "DisplayManager.h"
 
 namespace EVCorporation
 {
@@ -58,9 +59,14 @@ namespace EVCorporation
 				m_Message[i] = message[i];
 			}
 			
-			m_ErrorState = new TextNTO_State(keypad, nullptr, nullptr, m_CurrentTS, m_ActivationError, 32, 15, false, true);
+			m_ErrorState = new TextNTO_State(keypad, nullptr, nullptr, m_CurrentTS, m_ActivationError, 32, 15, true, true);
+      m_ErrorState->SetTextColor(TextColors::Red);
+      m_ErrorState->SetLED(TextColors::Green, true );
+      
 			m_ActivatingState = new TextNTO_State(keypad, m_ErrorState, nullptr, m_CurrentTS, m_ActivatingBIOChip, 15, 5, false, false);
-			
+			m_ActivatingState->SetLoader();
+      m_ActivatingState->SetLED(TextColors::Blue);
+      
 			ActivateBIOChipMenu[0] = m_ActivatingState;
 			ActivateBIOChipMenu[1] = this;
 			
@@ -75,6 +81,7 @@ namespace EVCorporation
 		
 		EVState* BIOChipON_State::loop()
 		{
+      SetLEDColor();
 			if ( m_ResetTS ) 
 			{
 				m_CurrentTS = millis();
@@ -82,13 +89,17 @@ namespace EVCorporation
 			}
 			
 			GetDisplay()->printPINPage(m_Message, m_CloneID, m_CloneID_len);
-			
+      GetDisplay()->SetLoader(HasLoader(),STATE_TIME_OUT_MS);
+     
 			char button_pressed =GetKeypad()->getKey();
 			
 			if ( button_pressed )
 			{
 				m_CurrentTS = millis();
 				
+				if ( HasLoader() )
+            GetDisplay()->ResetLoader();
+       
 				m_CloneID[m_CloneIDIndex] = button_pressed;
 		
 				m_CloneIDIndex++;
@@ -104,17 +115,18 @@ namespace EVCorporation
 					{
 						BIOM->EnableBIOChip(m_CloneID);
 						
-						GetDisplay()->clear();
+						
+						if (HasLoader())
+                  GetDisplay()->ResetLoader();
+            GetDisplay()->clear();
+           
+            
 						Serial.println("Clone ID Ok");
-						
-						EVState *next_state = GetNextState();
-						
 						ClearPIN();
-						
+            
+						EVState *next_state = GetNextState();
 						if ( next_state == nullptr) 
 						{
-							Serial.println("No Nextstate Setted");
-							
 							return this;
 						}
 						
@@ -133,7 +145,9 @@ namespace EVCorporation
 							m_ResetTS = true;
 							m_ErrorCount = 0;
 							
-							GetDisplay()->clear();
+							if (HasLoader())
+                  GetDisplay()->ResetLoader();
+              GetDisplay()->clear();
 							
 							//not removing previous state because going to blocked then returning back
 							m_BlockedState->SetStateCreationTimestamp( millis());
@@ -147,9 +161,21 @@ namespace EVCorporation
 			{
 				m_ErrorCount = 0;
 				m_ResetTS = true;
+       
 				Serial.println("Clone ID timed out");
+				
+				if (HasLoader())
+            GetDisplay()->ResetLoader();
 				GetDisplay()->clear();
-				return GetPreviousState();
+        
+        EVState *previous_state = GetPreviousState();
+        if ( previous_state == nullptr) 
+        {
+          return this;
+        }
+        
+        previous_state->SetStateCreationTimestamp( millis());
+				return previous_state;
 			}
 			
 			return this;

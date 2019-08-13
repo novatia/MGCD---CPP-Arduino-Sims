@@ -27,26 +27,28 @@ namespace EVCorporation
 		}
 		
 		EVState* TextNTO_State::loop()
-		{
-			GetDisplay()->printTextNTOPage( m_Message, m_Blink );
-			
+		{  
+      SetLEDColor();
+		  GetDisplay()->SetTextColor(GetTextColor());
+      GetDisplay()->printTextNTOPage( m_Message, m_Blink );
+			GetDisplay()->SetLoader(HasLoader(), m_TimeOut * 1000);
+     
 			if ( m_TimeOut != 0 )
 			{
 				
 				if ( millis() - GetStateCreationTimestamp() > m_TimeOut * 1000 )
 				{
-					EVState *previous_state = GetPreviousState();
-         
-					if ( previous_state == nullptr) 
-					{
-						Serial.println("No previous state Setted");
-						return this;
-					}
-					
-					previous_state->SetStateCreationTimestamp(millis());
-					
-					GetDisplay()->clear();
-				    
+					if (HasLoader())
+              GetDisplay()->ResetLoader();
+          GetDisplay()->clear();
+
+          
+          EVState *previous_state = GetPreviousState();
+          if ( previous_state == nullptr) 
+          {
+            return this;
+          }
+          previous_state->SetStateCreationTimestamp(millis());
 					return previous_state;
 				}
 			}
@@ -58,21 +60,19 @@ namespace EVCorporation
 				if ( button_pressed )
 				{
 					EVState *next_state = GetNextState();
-					
 					if ( next_state == nullptr) {
-						//Serial.println("No Nextstate Setted");
 						return this;
 					}
 					
-					next_state->SetStateCreationTimestamp(millis());
-					
-					GetDisplay()->clear();
-					//delete GetPreviousState();
+					if (HasLoader())
+              GetDisplay()->ResetLoader();
+          GetDisplay()->clear();
+          
+          next_state->SetStateCreationTimestamp(millis());
 					return next_state;
 				}
 			}
 			
-					
 			return this;
 		}
 	}

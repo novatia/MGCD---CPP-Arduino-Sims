@@ -12,10 +12,6 @@
 using namespace EVCorporation;
 using namespace EVStates;
 
-#define BLUE_PIN  11
-#define GREEN_PIN 12
-#define RED_PIN   13
-
 extern uint8_t BigFont[];
 UTFT ITDB02_28(ITDB28,38,39,40,41); //needed to be injected because of heap problems with the library loaded dinamically
 
@@ -41,10 +37,17 @@ BIOChipManager* m_BIOChipManager;
 
 EVState* m_CurrentState;
 
-
 void setup() 
 {
     Serial.begin(9600);
+ 
+    pinMode(BLUE_PIN,OUTPUT);
+    pinMode(GREEN_PIN,OUTPUT);
+    pinMode(RED_PIN,OUTPUT);
+
+    analogWrite(BLUE_PIN,0);
+    analogWrite(GREEN_PIN,255);
+    analogWrite(RED_PIN,255);
     
     ITDB02_28.InitLCD();
     ITDB02_28.setFont(BigFont);
@@ -76,14 +79,16 @@ void setup()
 
     BIOChipONState->SetPreviousState(admin_menu_state);
     BIOChipONState->SetErrorPreviousState(admin_menu_state);
+    BIOChipONState->SetLoader();
 
     BIOChipOFFState->SetPreviousState(admin_menu_state);
     BIOChipOFFState->SetSuccessPreviousState(admin_menu_state);
-    
+    BIOChipOFFState->SetLoader();
+
     EVState* admin_pin_state =  new PIN_State(&keypad, nullptr, admin_menu_state, AdminPINMessage,17,AdminPIN,5,millis());
     
     EVState* user_menu_1 =   new TextNTO_State(&keypad, nullptr, nullptr, millis(), NoDataMessage, 16, 4, true, false);
-  
+   
     EVState* UserMenu[3];
     const char UserMenuKeys[3] = {'1','2','3'};
     const char* MenuChoices[3] = {"1)Download BIOData","2)Manage BIOChip","3)Show BIOData"};
@@ -95,14 +100,18 @@ void setup()
     EVState* menu_state     =  new Menu_State(&keypad, nullptr, UserMenu, MenuChoices, UserMenuKeys, 3, UserMenuMessage,10, millis());
     
     user_menu_1->SetPreviousState(menu_state);
-    admin_pin_state->SetPreviousState(menu_state);
     
-    PIN_State* user_pin_state =  new PIN_State(&keypad, nullptr, menu_state, UserPINMessage,16,UserPIN,4,millis());
+    admin_pin_state->SetPreviousState(menu_state);
+    admin_pin_state->SetLoader();
+    admin_menu_state->SetLED(TextColors::Red);
+    
+    EVState* user_pin_state =  new PIN_State(&keypad, nullptr, menu_state, UserPINMessage,16,UserPIN,4,millis());
     EVState* start_state    =  new TextNTO_State(&keypad, nullptr, user_pin_state, millis(), press_a_button, 15, 0, true, true);
     
     user_pin_state->SetPreviousState(start_state);
     user_pin_state->SetLoader();
-    
+
+  
     m_CurrentState = start_state;
 }
 

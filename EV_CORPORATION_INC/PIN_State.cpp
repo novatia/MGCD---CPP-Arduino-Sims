@@ -51,14 +51,14 @@ namespace EVCorporation
 				m_Message[i] = message[i];
 			}
 			
-			m_BlockedState = new TextNTO_State(keypad, this, nullptr, m_CurrentTS, m_TooManyError, 15, 10000, false, true);
+			m_BlockedState = new TextNTO_State(keypad, this, nullptr, m_CurrentTS, m_TooManyError, 15, 10, false, false);
 			
 			ClearPIN();
 		}
 		
-		
 		EVState* PIN_State::loop()
 		{
+      SetLEDColor();
 			if ( m_ResetTS ) 
 			{
 				m_CurrentTS = millis();
@@ -66,20 +66,18 @@ namespace EVCorporation
 				m_ResetTS = false;
 			}
 			
-			if (m_EnableLoader)
-			    GetDisplay()->SetLoader(STATE_TIME_OUT_MS);
-        
 			GetDisplay()->printPINPage(m_Message, m_UserPIN, m_PIN_len);
-			
+		  GetDisplay()->SetLoader(HasLoader(),STATE_TIME_OUT_MS);
+    	
 			char button_pressed =GetKeypad()->getKey();
 			
 			if ( button_pressed )
 			{
 				m_CurrentTS = millis();
 				
-				if (m_EnableLoader)
-              GetDisplay()->ResetLoader();
-     
+				if (HasLoader())
+            GetDisplay()->ResetLoader();
+        
 				m_UserPIN[m_PINIndex] = button_pressed;
 				Serial.print(m_UserPIN[m_PINIndex]);
 				m_PINIndex++;
@@ -96,7 +94,8 @@ namespace EVCorporation
 					if (pin_checked) 
 					{ 
 						GetDisplay()->clear();
-            if (m_EnableLoader)
+            
+            if (HasLoader())
                 GetDisplay()->ResetLoader();
                 
 						Serial.println(" PIN Ok");
@@ -105,15 +104,12 @@ namespace EVCorporation
 						ClearPIN();
 						
 						if ( next_state == nullptr) {
-							Serial.println("No Nextstate Setted");
-							
-							return this;
+								return this;
 						}
 						
 						delete GetPreviousState();
 						
 						next_state->SetStateCreationTimestamp ( millis());
-						
 						return next_state;
 					}
 					else
@@ -121,7 +117,7 @@ namespace EVCorporation
 						ClearPIN();
 						m_ErrorCount++;
 						
-						if (m_EnableLoader)
+						if (HasLoader())
               GetDisplay()->ResetLoader();
      
 						if (m_ErrorCount>2)
@@ -144,19 +140,22 @@ namespace EVCorporation
 				m_ErrorCount = 0;
 				m_ResetTS = true;
 				Serial.println("User PIN timeout");
-				GetDisplay()->clear();
-				return GetPreviousState();
+			
+			  if (HasLoader())
+          GetDisplay()->ResetLoader();
+        GetDisplay()->clear();
+        
+        EVState *previous_state = GetPreviousState();
+        if ( previous_state == nullptr) 
+        {
+          return this;
+        }
+        
+        previous_state->SetStateCreationTimestamp( millis());
+      	return previous_state;
 			}
 			
 			return this;
 		}
-
-    void PIN_State::SetLED(){
-          m_EnableLED=true;
-    }
-    
-    void PIN_State::SetLoader(){
-          m_EnableLoader=true;
-    }
    }
 }

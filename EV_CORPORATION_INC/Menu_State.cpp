@@ -24,6 +24,7 @@ namespace EVCorporation
 		
 		EVState* Menu_State::loop()
 		{
+      SetLEDColor();
 			GetDisplay()->printUserMenuPage( m_Message, GetChoices(), GetNextStatesCount() );
 			
 			char button_pressed = GetKeypad()->getKey();
@@ -31,14 +32,13 @@ namespace EVCorporation
 			if ( button_pressed )
 			{
 				EVState *next_state = GetNextState(button_pressed);
-				
 				if ( next_state == nullptr) {
 					return this;
 				}
-					
-				next_state->SetStateCreationTimestamp(millis());
-					
+				
 				GetDisplay()->clear();
+        
+        next_state->SetStateCreationTimestamp(millis());
 				return next_state;
 			}
 			

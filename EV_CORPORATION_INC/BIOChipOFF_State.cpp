@@ -3,6 +3,7 @@
 #include "Menu_State.h"
 #include "BIOChipDetached_State.h"
 #include "BIOChipManager.h"
+#include "DisplayManager.h"
 
 namespace EVCorporation
 {
@@ -55,11 +56,15 @@ namespace EVCorporation
 			}
 			
 			m_DeactivationSuccessState = new BIOChipDetached_State(keypad,nullptr, nullptr, m_CurrentTS,m_DeactivatedBIOChip, 32, 15, false, true);
-			
+			m_DeactivationSuccessState->SetTextColor(TextColors::Green);
+      m_DeactivationSuccessState->SetLED(TextColors::Green);
+     
 			m_AlreadyDetachedState = new TextNTO_State(keypad, this, nullptr, m_CurrentTS, m_AlreadyDetachedError, 33, 5, false, false);
 									
 			m_DeactivatingState = new TextNTO_State(keypad, m_DeactivationSuccessState, nullptr, m_CurrentTS, m_DeactivatingBIOChip, 28, 5, false, false);
-			
+			m_DeactivatingState->SetLoader();
+      m_DeactivatingState->SetLED(TextColors::Blue);
+     
 			DeactivateBIOChipMenu[0] = m_DeactivatingState;
 			DeactivateBIOChipMenu[1] = this;
 			
@@ -74,20 +79,28 @@ namespace EVCorporation
 		
 		EVState* BIOChipOFF_State::loop()
 		{
+      SetLEDColor();
+			
 			if ( m_ResetTS ) 
 			{
+        if ( HasLoader() )
+            GetDisplay()->ResetLoader();
 				m_CurrentTS = millis();
 				m_ResetTS = false;
 			}
 			
 			GetDisplay()->printPINPage(m_Message, m_CloneID, m_CloneID_len);
-			
-			char button_pressed =GetKeypad()->getKey();
+		  GetDisplay()->SetLoader(HasLoader(),STATE_TIME_OUT_MS);
+     
+			char button_pressed = GetKeypad()->getKey();
 			
 			if ( button_pressed )
 			{
 				m_CurrentTS = millis();
 				
+				if ( HasLoader() )
+            GetDisplay()->ResetLoader();
+            
 				m_CloneID[m_CloneIDIndex] = button_pressed;
 		
 				m_CloneIDIndex++;
@@ -103,17 +116,21 @@ namespace EVCorporation
 					
 					if ( pin_checked ) 
 					{
+            if (HasLoader())
+              GetDisplay()->ResetLoader();
+            GetDisplay()->clear();
+           
 						if ( !BIOM->IsEnabled(m_CloneID) ) 
 						{		
 								Serial.println(" Already detached");
 								//already detached
 								m_ResetTS = true;
-								GetDisplay()->clear();
+                ClearPIN();
+                
 								m_AlreadyDetachedState->SetStateCreationTimestamp( millis());
 								return m_AlreadyDetachedState;
 						}
-						
-						GetDisplay()->clear();
+
 						Serial.println(" Clone ID Ok... detaching");
 						
 						EVState *next_state = GetNextState();
@@ -127,6 +144,7 @@ namespace EVCorporation
 						
 						m_DeactivationSuccessState->SetCloneID(m_CloneID);
 						ClearPIN();
+           
 						next_state->SetStateCreationTimestamp ( millis());
 						return next_state;
 					}
@@ -142,9 +160,11 @@ namespace EVCorporation
 							m_ResetTS = true;
 							m_ErrorCount = 0;
 							
+							
+							if (HasLoader())
+                  GetDisplay()->ResetLoader();
 							GetDisplay()->clear();
 							
-							//not removing previous state because going to blocked then returning back
 							m_BlockedState->SetStateCreationTimestamp( millis());
 							return m_BlockedState;
 						}
@@ -157,8 +177,19 @@ namespace EVCorporation
 				m_ErrorCount = 0;
 				m_ResetTS = true;
 				Serial.println("Clone ID timed out");
-				GetDisplay()->clear();
-				return GetPreviousState();
+       
+			  if (HasLoader())
+            GetDisplay()->ResetLoader();
+        GetDisplay()->clear();
+       
+        EVState *previous_state = GetPreviousState();
+        if ( previous_state == nullptr) 
+        {
+          return this;
+        }
+        
+        previous_state->SetStateCreationTimestamp( millis());
+				return previous_state;
 			}
 			
 			return this;
