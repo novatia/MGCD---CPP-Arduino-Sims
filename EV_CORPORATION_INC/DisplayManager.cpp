@@ -1,6 +1,8 @@
 #include "KeysConstants.h"
 #include "DisplayManager.h"
 
+#define LOADER_TICK 500
+
 #define BLINK_MS 500
 
 #define RED		255,0,0
@@ -40,7 +42,8 @@ namespace EVCorporation
 		m_PrintedBody    = false;
 		m_PrintedHeader  = false;
 		m_PrintedFooter  = false;
-		
+		m_EnableLoader   = false;
+   
 		m_ITDB02_28->clrScr();
 	}
 
@@ -61,11 +64,56 @@ namespace EVCorporation
 		}
 	}
 
+  unsigned int DisplayManager::GetProgress()
+  {
+      return WIDTH_RESOLUTION * ( m_CurrentTime - m_CurrentStartTime ) / m_Timeout;
+  }
+
+  void DisplayManager::SetLoader(unsigned int time_out)
+  {
+      //main loop parameters
+      m_Timeout  = time_out;
+      m_EnableLoader = true;
+     
+      
+      if ( m_CurrentStartTime == 0 )
+      {
+        m_CurrentStartTime = millis();
+        m_CurrentTick = millis();
+      }
+      
+      m_CurrentTime = millis();
+  }
+
+  void DisplayManager::ResetLoader()
+  {
+      Serial.println("Reset loader");
+      
+      m_CurrentStartTime = millis();
+      m_CurrentTime = m_CurrentStartTime;
+      m_CurrentTick = m_CurrentTime;
+      
+      m_ITDB02_28->setColor(BLACK);
+      m_ITDB02_28->fillRect(0, 210, 320, 240);
+  }
+
 	void DisplayManager::printFooter()
-	{	if ( !m_PrintedFooter ) 
+	{	
+	  if ( m_EnableLoader )
+    {
+        
+        if (  (m_CurrentTime - m_CurrentTick)  >= LOADER_TICK )
+        {
+           m_CurrentTick = m_CurrentTime;
+           m_LastProgress = GetProgress();
+           m_ITDB02_28->setColor(BACKGROUND_COLOR);
+           m_ITDB02_28->fillRect(0, 210, m_LastProgress, 240);
+        }
+        
+    }
+    
+	  if ( !m_PrintedFooter ) 
 		{
-			//drawKeys();
-			//drawSpinner();
 			m_PrintedFooter = true;
 		}
 	}
@@ -203,256 +251,4 @@ namespace EVCorporation
 			
 		printFooter();
 	}
-
-	/*
-	void DisplayManager::printStartPage()
-	{
-			unsigned long ts = millis(); 
-			
-			printHeader();
-			
-			if ( (ts % BLINK_MS) == 0 ) {
-				if (m_Blink > 0)
-					m_Blink = 0;	
-				else 
-					m_Blink = 255;
-				
-				m_ITDB02_28->setColor(0, 0, m_Blink);
-				m_ITDB02_28->setBackColor(BLACK);
-				m_ITDB02_28->print("Press a button", CENTER, 80);
-			}
-			
-			printFooter();
-	}
-	
-	void DisplayManager::printNoDataPage()
-	{
-			
-			unsigned long ts = millis(); 
-			
-			printHeader();
-			
-			if ( (ts % BLINK_MS) == 0 ) {
-				if (m_Blink > 0)
-					m_Blink = 0;	
-				else 
-					m_Blink = 255;
-				
-				m_ITDB02_28->setColor(m_Blink, 0, 0);
-				m_ITDB02_28->setBackColor(BLACK);
-				m_ITDB02_28->print("No data available", CENTER, 80);
-			}
-			
-			printFooter();
-	}
-
-
-	void DisplayManager::printPINErrorPage()
-	{
-			
-			
-			printHeader();
-			
-			unsigned long ts = millis(); 
-			
-			if ( (ts % BLINK_MS) == 0 ) {
-				if (m_Blink > 0)
-					m_Blink = 0;	
-				else 
-					m_Blink = 255;
-				
-				m_ITDB02_28->setColor(m_Blink, 0, 0);
-				m_ITDB02_28->setBackColor(BLACK);
-				m_ITDB02_28->print("Too many error", CENTER, 80);
-			}
-			
-			printFooter();
-	}
-
-
-	void DisplayManager::printUserMenuPage()
-	{
-		printHeader();
-
-		m_ITDB02_28->setColor(TEXT_COLOR);
-		m_ITDB02_28->setBackColor(BLACK);
-		m_ITDB02_28->print("User menu", CENTER, 80);
-		
-		m_ITDB02_28->print("1)Download BIOData", 1, 120);
-		m_ITDB02_28->print("2)Manage BIOChip", 1, 140);
-		m_ITDB02_28->print("3)Show BIOData", 1, 160);
-		
-		printFooter();
-	}
-
-	void DisplayManager::printAdminPINPage(char* PIN)
-	{
-		unsigned long ts = millis(); 
-
-		printHeader();
-
-		m_ITDB02_28->setColor(TEXT_COLOR);
-		m_ITDB02_28->setBackColor(BLACK);
-		m_ITDB02_28->print("Insert Admin PIN", CENTER, 80);
-		
-		if (PIN[0]!=0)
-		{
-			m_ITDB02_28->print("*",60,100);
-		} else {
-			m_ITDB02_28->print("_",60,100);
-		}
-		
-		if (PIN[1]!=0)
-		{
-			m_ITDB02_28->print("*",80,100);
-		} else {
-			m_ITDB02_28->print("_",80,100);
-		}
-		
-		if (PIN[2]!=0)
-		{
-			m_ITDB02_28->print("*",100,100);
-		} else {
-			m_ITDB02_28->print("_",100,100);
-		}
-		
-		if (PIN[3]!=0)
-		{
-			m_ITDB02_28->print("*",120,100);
-		} else {
-			m_ITDB02_28->print("_",120,100);
-		}
-		
-		if (PIN[4]!=0)
-		{
-			m_ITDB02_28->print("*",140,100);
-		} else {
-			m_ITDB02_28->print("_",140,100);
-		}
-			
-		printFooter();
-	}
-
-	void DisplayManager::printAdminMenuPage()
-	{
-		printHeader();
-
-		m_ITDB02_28->setColor(TEXT_COLOR);
-		m_ITDB02_28->setBackColor(BLACK);
-		m_ITDB02_28->print("Admin menu", CENTER, 80);
-		
-		m_ITDB02_28->print("1)Activate BIOChip", 1, 120);
-		m_ITDB02_28->print("2)Detach BIOChip", 1, 140);
-		
-		printFooter();
-	}
-	
-	void DisplayManager::printBIOActivateChipPage(char* CloneID)
-	{
-		unsigned long ts = millis(); 
-
-		printHeader();
-
-		m_ITDB02_28->setColor(TEXT_COLOR);
-		m_ITDB02_28->setBackColor(BLACK);
-		m_ITDB02_28->print("Insert Clone ID", CENTER, 80);
-		
-		if (CloneID[0]!=0)
-		{
-			m_ITDB02_28->print("*",60,100);
-		} else {
-			m_ITDB02_28->print("_",60,100);
-		}
-		
-		if (CloneID[1]!=0)
-		{
-			m_ITDB02_28->print("*",80,100);
-		} else {
-			m_ITDB02_28->print("_",80,100);
-		}
-		
-		if (CloneID[2]!=0)
-		{
-			m_ITDB02_28->print("*",100,100);
-		} else {
-			m_ITDB02_28->print("_",100,100);
-		}
-		
-		if (CloneID[3]!=0)
-		{
-			m_ITDB02_28->print("*",120,100);
-		} else {
-			m_ITDB02_28->print("_",120,100);
-		}
-			
-		printFooter();
-	}
-	
-	void DisplayManager::printBIOActivatePage()
-	{
-		printHeader();
-
-		m_ITDB02_28->setColor(TEXT_COLOR);
-		m_ITDB02_28->setBackColor(BLACK);
-		m_ITDB02_28->print("Activate BIOChip?", CENTER, 80);
-		
-		m_ITDB02_28->print("Yes(1)/No(0)", 1, 120);
-		
-		printFooter();
-	}
-	
-	void DisplayManager::printBIOActivatingPage()
-	{
-			printHeader();
-
-		m_ITDB02_28->setColor(TEXT_COLOR);
-		m_ITDB02_28->setBackColor(BLACK);
-		m_ITDB02_28->print("Activating...", CENTER, 80);
-		
-		printFooter();
-	}
-	
-	void DisplayManager::printBIOActivatingErrorPage()
-	{
-		printHeader();
-
-		unsigned long ts = millis(); 
-			
-		if ( (ts % BLINK_MS) == 0 ) {
-				if (m_Blink > 0)
-					m_Blink = 0;	
-				else 
-					m_Blink = 255;
-				
-				m_ITDB02_28->setColor(m_Blink, 0, 0);
-				m_ITDB02_28->setBackColor(BLACK);
-				
-				m_ITDB02_28->print("Error BIOChip already", CENTER, 80);
-				m_ITDB02_28->print("activated.", CENTER, 120);
-		}
-
-		printFooter();
-	}
-	
-	void DisplayManager::printBIODeactivateChipPage(char* CloneID)
-	{
-		
-	}
-	
-	void DisplayManager::printBIODeactivatePage()
-	{
-		
-	}
-	
-	void DisplayManager::printBIODeactivationSuccessPage()
-	{
-		
-	}
-
-	void DisplayManager::printBIOAllDeactivationSuccessPage()
-	{
-		
-	}
-	
-	*/
 }

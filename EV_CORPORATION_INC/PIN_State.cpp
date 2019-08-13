@@ -7,6 +7,7 @@ namespace EVCorporation
 	{
 		void PIN_State::ClearPIN() 
 		{
+      Serial.println("Clear PIN");
 			m_PINIndex = 0;
 			
 			for (unsigned short int i=0;i<m_PIN_len;i++)
@@ -60,11 +61,14 @@ namespace EVCorporation
 		{
 			if ( m_ResetTS ) 
 			{
-				Serial.println("Reset user TO");
 				m_CurrentTS = millis();
+				ClearPIN();
 				m_ResetTS = false;
 			}
 			
+			if (m_EnableLoader)
+			    GetDisplay()->SetLoader(STATE_TIME_OUT_MS);
+        
 			GetDisplay()->printPINPage(m_Message, m_UserPIN, m_PIN_len);
 			
 			char button_pressed =GetKeypad()->getKey();
@@ -73,6 +77,9 @@ namespace EVCorporation
 			{
 				m_CurrentTS = millis();
 				
+				if (m_EnableLoader)
+              GetDisplay()->ResetLoader();
+     
 				m_UserPIN[m_PINIndex] = button_pressed;
 				Serial.print(m_UserPIN[m_PINIndex]);
 				m_PINIndex++;
@@ -89,12 +96,17 @@ namespace EVCorporation
 					if (pin_checked) 
 					{ 
 						GetDisplay()->clear();
-						Serial.println("PIN Ok");
+            if (m_EnableLoader)
+                GetDisplay()->ResetLoader();
+                
+						Serial.println(" PIN Ok");
 						EVState *next_state = GetNextState();
 					
+						ClearPIN();
+						
 						if ( next_state == nullptr) {
 							Serial.println("No Nextstate Setted");
-							ClearPIN();
+							
 							return this;
 						}
 						
@@ -109,6 +121,9 @@ namespace EVCorporation
 						ClearPIN();
 						m_ErrorCount++;
 						
+						if (m_EnableLoader)
+              GetDisplay()->ResetLoader();
+     
 						if (m_ErrorCount>2)
 						{
 							m_ResetTS = true;
@@ -135,5 +150,13 @@ namespace EVCorporation
 			
 			return this;
 		}
-	}
+
+    void PIN_State::SetLED(){
+          m_EnableLED=true;
+    }
+    
+    void PIN_State::SetLoader(){
+          m_EnableLoader=true;
+    }
+   }
 }

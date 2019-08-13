@@ -19,6 +19,11 @@ namespace EVCorporation
 				char *m_PIN;
 				char *m_UserPIN;
 				char *m_Message;
+
+        bool m_EnableLoader;
+        bool m_EnableLED;
+        
+       
 				unsigned short int m_PIN_len;
 				unsigned short int m_PINIndex   = 0;
 				unsigned short int m_ErrorCount = 0;
@@ -32,6 +37,9 @@ namespace EVCorporation
 				PIN_State(Keypad* keypad, EVState* previous_state, EVState* next_state,const char *message, unsigned short int message_len,const char *PIN,unsigned short int PIN_len, unsigned long state_creation_time);
 				~PIN_State();
 				void ClearPIN();
+
+        void SetLoader();
+        void SetLED();
 		};
 	}
 }

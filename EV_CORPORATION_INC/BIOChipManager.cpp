@@ -6,10 +6,32 @@ namespace EVCorporation
 		
 	BIOChipManager::BIOChipManager()
 	{
-		m_BIOChips[0] = "6824";
-		m_BIOChips[1] = "5249";
-		m_BIOChips[2] = "8221";
-		m_BIOChips[3] = "1438";
+    m_BIOChips[0][0] = 0;
+    m_BIOChips[0][1] = 0;
+    m_BIOChips[0][2] = 0;
+    m_BIOChips[0][3] = 0;
+
+		m_BIOChips[1][0] = '5';
+    m_BIOChips[1][1] = '2';
+    m_BIOChips[1][2] = '4';
+    m_BIOChips[1][3] = '9';
+
+    m_BIOChips[2][0] = '8';
+    m_BIOChips[2][1] = '2';
+    m_BIOChips[2][2] = '2';
+    m_BIOChips[2][3] = '1';
+
+    m_BIOChips[3][0] = '1';
+    m_BIOChips[3][1] = '4';
+    m_BIOChips[3][2] = '3';
+    m_BIOChips[3][3] = '8';
+
+    m_BIOChips[4][0] = '6';
+    m_BIOChips[4][1] = '8';
+    m_BIOChips[4][2] = '2';
+    m_BIOChips[4][3] = '4';
+
+		resetBIOChips();
 	}
 	
 	BIOChipManager* BIOChipManager::GetInstance()
@@ -24,7 +46,9 @@ namespace EVCorporation
 	{
 		if (CheckBIOChipPIN(PIN))
 		{
-			m_Enabled[GetBIOChipPINIndex(PIN)] = false;
+      short int index = GetBIOChipPINIndex(PIN);
+    
+			m_Enabled[index] = false;
 		}
 	}
 	
@@ -32,16 +56,31 @@ namespace EVCorporation
 	{
 		if (CheckBIOChipPIN(PIN))
 		{
-			m_Enabled[GetBIOChipPINIndex(PIN)] = true;
+      short int index = GetBIOChipPINIndex(PIN);
+    
+      m_Enabled[index] = true;
 		}
 	}
 
-  bool BIOChipManager::IsEnabled(char *PIN){
+  bool BIOChipManager::IsEnabled(char *PIN)
+  {
      short int index = GetBIOChipPINIndex(PIN) ;
-     if (index<0)
-      return false;
+    
+     if ( index < 0 )
+        return false;
 
      return m_Enabled[index];
+  }
+  
+  
+  bool BIOChipManager::AllDisabled() 
+  {
+		bool one_attached = false;
+		
+		for (int i=0;i<CHIPS;i++)
+			one_attached = one_attached | m_Enabled[i];
+		
+		return !one_attached;
   }
   
 	bool BIOChipManager::CheckBIOChipPIN(char *PIN)
@@ -53,12 +92,12 @@ namespace EVCorporation
 	{
 		short int index = -1;
 		
-		for (unsigned short int i = 0; i<4; i++)
+		for (int i = 0; i<CHIPS; i++)
 		{
 			index = i;
-			const char *next_pin = m_BIOChips[i];
+			char *next_pin = m_BIOChips[i];
      
-			for (unsigned short int j = 0; j<4; j++) 
+			for (int j = 0; j<4; j++) 
 			{
 				if (PIN[j] != next_pin[j])
 					index = -1;
@@ -73,9 +112,11 @@ namespace EVCorporation
 	
 	void BIOChipManager::resetBIOChips()
 	{
-		m_Enabled[0] = true;
-		m_Enabled[1] = true;
-		m_Enabled[2] = true;
-		m_Enabled[3] = true;
-	}
-} 
+    for ( int i=0; i<CHIPS; i++)
+    {
+  		  m_Enabled[i] = true;
+  	}
+
+    m_Enabled[0] = false;
+  }
+}

@@ -80,7 +80,6 @@ void setup()
     BIOChipOFFState->SetPreviousState(admin_menu_state);
     BIOChipOFFState->SetSuccessPreviousState(admin_menu_state);
     
-    
     EVState* admin_pin_state =  new PIN_State(&keypad, nullptr, admin_menu_state, AdminPINMessage,17,AdminPIN,5,millis());
     
     EVState* user_menu_1 =   new TextNTO_State(&keypad, nullptr, nullptr, millis(), NoDataMessage, 16, 4, true, false);
@@ -98,10 +97,11 @@ void setup()
     user_menu_1->SetPreviousState(menu_state);
     admin_pin_state->SetPreviousState(menu_state);
     
-    EVState* user_pin_state =  new PIN_State(&keypad, nullptr, menu_state, UserPINMessage,16,UserPIN,4,millis());
+    PIN_State* user_pin_state =  new PIN_State(&keypad, nullptr, menu_state, UserPINMessage,16,UserPIN,4,millis());
     EVState* start_state    =  new TextNTO_State(&keypad, nullptr, user_pin_state, millis(), press_a_button, 15, 0, true, true);
     
     user_pin_state->SetPreviousState(start_state);
+    user_pin_state->SetLoader();
     
     m_CurrentState = start_state;
 }

@@ -1,22 +1,24 @@
 #pragma once
 
+#define CHIPS 5
+
 namespace EVCorporation
 {
 	class BIOChipManager 
 	{
 		private:
-			const char *m_BIOChips[4];
-			bool m_Enabled[4];
-			
 			static BIOChipManager* m_Instance;
-			
+      bool m_Enabled[CHIPS];
+			char m_BIOChips[CHIPS][4];
+      
 			BIOChipManager();
 
 		public:
 			static BIOChipManager* GetInstance();
 			bool DisableBIOChip(char *PIN);
 			bool EnableBIOChip(char *PIN);
-      bool IsEnabled(char *PIN);
+			bool IsEnabled(char *PIN);
+			bool AllDisabled();
 			void resetBIOChips();
 			bool CheckBIOChipPIN(char *PIN);
 			short int GetBIOChipPINIndex(char *PIN);

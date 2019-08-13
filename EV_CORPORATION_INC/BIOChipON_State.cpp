@@ -40,6 +40,7 @@ namespace EVCorporation
 			}
 			
 			m_ErrorState->SetPreviousState(previous_state);
+      m_ErrorState->SetNextState(previous_state);
 		}
 		
 		BIOChipON_State::BIOChipON_State (Keypad* keypad, EVState* previous_state, EVState* next_state,const char *message, unsigned short int message_len, unsigned short int PIN_len, unsigned long state_creation_time) : EVState( keypad, previous_state, next_state, state_creation_time ) 
@@ -57,7 +58,7 @@ namespace EVCorporation
 				m_Message[i] = message[i];
 			}
 			
-			m_ErrorState = new TextNTO_State(keypad, nullptr, nullptr, m_CurrentTS, m_ActivationError, 32, 15, false, false);
+			m_ErrorState = new TextNTO_State(keypad, nullptr, nullptr, m_CurrentTS, m_ActivationError, 32, 15, false, true);
 			m_ActivatingState = new TextNTO_State(keypad, m_ErrorState, nullptr, m_CurrentTS, m_ActivatingBIOChip, 15, 5, false, false);
 			
 			ActivateBIOChipMenu[0] = m_ActivatingState;
@@ -107,14 +108,16 @@ namespace EVCorporation
 						Serial.println("Clone ID Ok");
 						
 						EVState *next_state = GetNextState();
-					
+						
+						ClearPIN();
+						
 						if ( next_state == nullptr) 
 						{
 							Serial.println("No Nextstate Setted");
-							ClearPIN();
+							
 							return this;
 						}
-           
+						
 						next_state->SetStateCreationTimestamp ( millis());
 						return next_state;
 					}

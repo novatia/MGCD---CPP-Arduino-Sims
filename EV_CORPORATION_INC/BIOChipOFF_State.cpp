@@ -30,17 +30,13 @@ namespace EVCorporation
 		
 		void BIOChipOFF_State::SetSuccessPreviousState(EVState* previous_state)
 		{
-			if (previous_state==nullptr)
+			if ( previous_state == nullptr )
 			{
 				return;
 			}
 			
-			//if (m_ErrorState==nullptr)
-			//{
-			//	  return;
-			//}
-			
-			
+			m_DeactivationSuccessState->SetPreviousState(previous_state);
+      m_DeactivationSuccessState->SetNextState(previous_state);
 		}
 		
 		BIOChipOFF_State::BIOChipOFF_State (Keypad* keypad, EVState* previous_state, EVState* next_state,const char *message, unsigned short int message_len, unsigned short int PIN_len, unsigned long state_creation_time) : EVState( keypad, previous_state, next_state, state_creation_time ) 
@@ -58,12 +54,11 @@ namespace EVCorporation
 				m_Message[i] = message[i];
 			}
 			
-			
-			
+			m_DeactivationSuccessState = new BIOChipDetached_State(keypad,nullptr, nullptr, m_CurrentTS,m_DeactivatedBIOChip, 32, 15, false, true);
 			
 			m_AlreadyDetachedState = new TextNTO_State(keypad, this, nullptr, m_CurrentTS, m_AlreadyDetachedError, 33, 5, false, false);
 									
-			m_DeactivatingState = new TextNTO_State(keypad, nullptr, nullptr, m_CurrentTS, m_DeactivatingBIOChip, 28, 5, false, false);
+			m_DeactivatingState = new TextNTO_State(keypad, m_DeactivationSuccessState, nullptr, m_CurrentTS, m_DeactivatingBIOChip, 28, 5, false, false);
 			
 			DeactivateBIOChipMenu[0] = m_DeactivatingState;
 			DeactivateBIOChipMenu[1] = this;
@@ -103,12 +98,14 @@ namespace EVCorporation
 					BIOChipManager *BIOM = BIOChipManager::GetInstance();
 					
 					pin_checked = BIOM->CheckBIOChipPIN(m_CloneID);
-							Serial.print(pin_checked);			
-							
+					
+					Serial.print(m_CloneID);
+					
 					if ( pin_checked ) 
 					{
 						if ( !BIOM->IsEnabled(m_CloneID) ) 
 						{		
+								Serial.println(" Already detached");
 								//already detached
 								m_ResetTS = true;
 								GetDisplay()->clear();
@@ -117,24 +114,26 @@ namespace EVCorporation
 						}
 						
 						GetDisplay()->clear();
-						Serial.println("Clone ID Ok");
+						Serial.println(" Clone ID Ok... detaching");
 						
 						EVState *next_state = GetNextState();
-					
+
 						if ( next_state == nullptr) 
 						{
 							Serial.println("No Nextstate Setted");
-							ClearPIN();
+							
 							return this;
 						}
-           
+						
+						m_DeactivationSuccessState->SetCloneID(m_CloneID);
+						ClearPIN();
 						next_state->SetStateCreationTimestamp ( millis());
 						return next_state;
 					}
 					else
 					{
 						Serial.print(m_CloneID);
-						Serial.println(" ID not matching");
+						Serial.println(" Clone ID not matching");
 						ClearPIN();
 						m_ErrorCount++;
 						

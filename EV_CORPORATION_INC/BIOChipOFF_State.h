@@ -1,4 +1,5 @@
 #include "EVState.h"
+#include "BIOChipDetached_State.h"
 
 namespace EVCorporation
 {
@@ -35,7 +36,7 @@ namespace EVCorporation
 				EVState* m_DeactivatingState;
 				
 				const char *m_DeactivatedBIOChip = "BIOChip detachedProcedure done.";
-				EVState* m_DeactivationSuccessState;
+				BIOChipDetached_State* m_DeactivationSuccessState;
 				
 			public:
 				~BIOChipOFF_State();
