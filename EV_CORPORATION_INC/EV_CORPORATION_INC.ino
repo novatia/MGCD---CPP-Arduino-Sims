@@ -7,6 +7,7 @@
 #include "PIN_State.h"
 #include "Menu_State.h"
 #include "BIOChipON_State.h"
+#include "BIOChipOFF_State.h"
 
 using namespace EVCorporation;
 using namespace EVStates;
@@ -52,8 +53,6 @@ void setup()
     m_DisplayManager = DisplayManager::GetInstance();
     m_DisplayManager->setup(&ITDB02_28);
   
-    Serial.println("GOTO TextNTO_State");
-  
     const char* UserPIN = "3845";
     const char* AdminPIN= "16245";
     const char* UserPINMessage =  "Insert user PIN";
@@ -61,23 +60,26 @@ void setup()
     const char* UserMenuMessage = "User menu";
     const char* NoDataMessage = "*** No data ***";
     const char* AdminMenuMessage = "Admin menu";
-
     const char* BIOChipPINMessage = "Insert Clone ID";
-
-    
-    
-    EVState* BIOChipONState = new BIOChipON_State(&keypad, nullptr, nullptr, BIOChipPINMessage,16,4,millis());
+  
+    BIOChipON_State* BIOChipONState = new BIOChipON_State(&keypad, nullptr, nullptr, BIOChipPINMessage,16,4,millis());
+    BIOChipOFF_State* BIOChipOFFState = new BIOChipOFF_State(&keypad, nullptr, nullptr, BIOChipPINMessage,16,4,millis());
     
     EVState* AdminMenu[2];
     
     const char AdminMenuKeys[3] = {'1','2'};
     const char* AdminMenuChoices[3] = {"1)Activate BIOChip","2)Detach BIOChip"};
     AdminMenu[0] = BIOChipONState;
-    AdminMenu[1] = nullptr;  //BIOChipOFFState;
+    AdminMenu[1] = BIOChipOFFState; 
     
     EVState* admin_menu_state     =  new Menu_State(&keypad, nullptr, AdminMenu, AdminMenuChoices, AdminMenuKeys, 2, AdminMenuMessage,11, millis());
 
     BIOChipONState->SetPreviousState(admin_menu_state);
+    BIOChipONState->SetErrorPreviousState(admin_menu_state);
+
+    BIOChipOFFState->SetPreviousState(admin_menu_state);
+    BIOChipOFFState->SetSuccessPreviousState(admin_menu_state);
+    
     
     EVState* admin_pin_state =  new PIN_State(&keypad, nullptr, admin_menu_state, AdminPINMessage,17,AdminPIN,5,millis());
     

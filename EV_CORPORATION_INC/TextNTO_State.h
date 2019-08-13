@@ -16,9 +16,10 @@ namespace EVCorporation
 				bool m_PressButton;
 				
 			public:
-				EVState* loop();
-				TextNTO_State(Keypad* keypad, EVState* previous_state, EVState* next_state, unsigned long state_entry_time,const char *message, unsigned short int message_len, unsigned short int time_out, bool blink, bool press_button);
 				~TextNTO_State();
+				TextNTO_State(Keypad* keypad, EVState* previous_state, EVState* next_state, unsigned long state_entry_time,const char *message, unsigned short int message_len, unsigned short int time_out, bool blink, bool press_button);
+				
+				EVState* loop() override;
 		};
 	}
 }

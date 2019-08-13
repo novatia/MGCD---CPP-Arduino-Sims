@@ -35,27 +35,37 @@ namespace EVCorporation
 			m_Enabled[GetBIOChipPINIndex(PIN)] = true;
 		}
 	}
-	
+
+  bool BIOChipManager::IsEnabled(char *PIN){
+     short int index = GetBIOChipPINIndex(PIN) ;
+     if (index<0)
+      return false;
+
+     return m_Enabled[index];
+  }
+  
 	bool BIOChipManager::CheckBIOChipPIN(char *PIN)
 	{
-		if ( GetBIOChipPINIndex(PIN)<0 )
-			return false;
-		return true;
+		  return GetBIOChipPINIndex(PIN) > 0;
 	}
 	
 	short int BIOChipManager::GetBIOChipPINIndex(char *PIN)
 	{
-		int index=-1;
+		short int index = -1;
 		
 		for (unsigned short int i = 0; i<4; i++)
 		{
 			index = i;
-			
+			const char *next_pin = m_BIOChips[i];
+     
 			for (unsigned short int j = 0; j<4; j++) 
 			{
-				if (PIN[j] != m_BIOChips[i][j])
+				if (PIN[j] != next_pin[j])
 					index = -1;
 			}
+			
+      if ( index >= 0 )
+        break;
 		}
 		
 		return index;

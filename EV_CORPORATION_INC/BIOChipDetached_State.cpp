@@ -1,22 +1,29 @@
-#include "TextNTO_State.h"
+#include "BIOChipDetached_State.h"
+#include "BIOChipManager.h"
 
 namespace EVCorporation
 {
 	namespace EVStates
 	{
 		
-		TextNTO_State::~TextNTO_State()
+		BIOChipDetached_State::~BIOChipDetached_State()
 		{
 			delete[] m_Message;
 		}
 		
-		TextNTO_State::TextNTO_State(Keypad* keypad,  EVState* previous_state, EVState* next_state, unsigned long state_entry_time, const char *message, unsigned short int message_len, unsigned short int time_out, bool blink, bool press_button ): EVState(keypad, previous_state, next_state, state_entry_time)
+		BIOChipDetached_State::BIOChipDetached_State(Keypad* keypad,  EVState* previous_state, EVState* next_state, unsigned long state_entry_time, const char *message, unsigned short int message_len, unsigned short int time_out, bool blink, bool press_button,char *CloneID ): EVState(keypad, previous_state, next_state, state_entry_time)
 		{
 			m_Message = new char[message_len]();
 			
 			for ( int i=0; i < message_len ; i++ ) 
 			{
 				m_Message[i] = message[i];
+			}
+			
+				
+			for ( int i=0; i < 4 ; i++ ) 
+			{
+				m_CloneID[i] = CloneID[i];
 			}
 			
 			m_MessageLenght = message_len;
@@ -26,7 +33,7 @@ namespace EVCorporation
 			m_PressButton = press_button;
 		}
 		
-		EVState* TextNTO_State::loop()
+		EVState* BIOChipDetached_State::loop()
 		{
 			GetDisplay()->printTextNTOPage( m_Message, m_Blink );
 			
@@ -35,7 +42,9 @@ namespace EVCorporation
 				
 				if ( millis() - GetStateCreationTimestamp() > m_TimeOut * 1000 )
 				{
-					EVState *previous_state = GetPreviousState();
+					BIOChipManager* BIOM = BIOChipManager::GetInstance();
+					BIOM->DisableBIOChip(m_CloneID);
+					EVState* previous_state = GetPreviousState();
          
 					if ( previous_state == nullptr) 
 					{

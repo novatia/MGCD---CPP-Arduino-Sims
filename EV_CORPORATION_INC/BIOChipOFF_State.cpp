@@ -1,13 +1,14 @@
-#include "BIOChipON_State.h"
+#include "BIOChipOFF_State.h"
 #include "TextNTO_State.h"
 #include "Menu_State.h"
+#include "BIOChipDetached_State.h"
 #include "BIOChipManager.h"
 
 namespace EVCorporation
 {
 	namespace EVStates
 	{
-		void BIOChipON_State::ClearPIN() 
+		void BIOChipOFF_State::ClearPIN() 
 		{
 			m_CloneIDIndex = 0;
 			
@@ -19,7 +20,7 @@ namespace EVCorporation
 			m_ResetTS = true;
 		}
 		
-		BIOChipON_State::~BIOChipON_State ()
+		BIOChipOFF_State::~BIOChipOFF_State ()
 		{
 			
 			delete[] m_CloneID;
@@ -27,22 +28,22 @@ namespace EVCorporation
 		}
 		
 		
-		void BIOChipON_State::SetErrorPreviousState(EVState* previous_state)
+		void BIOChipOFF_State::SetSuccessPreviousState(EVState* previous_state)
 		{
 			if (previous_state==nullptr)
 			{
 				return;
 			}
 			
-			if (m_ErrorState==nullptr)
-			{
-				  return;
-			}
+			//if (m_ErrorState==nullptr)
+			//{
+			//	  return;
+			//}
 			
-			m_ErrorState->SetPreviousState(previous_state);
+			
 		}
 		
-		BIOChipON_State::BIOChipON_State (Keypad* keypad, EVState* previous_state, EVState* next_state,const char *message, unsigned short int message_len, unsigned short int PIN_len, unsigned long state_creation_time) : EVState( keypad, previous_state, next_state, state_creation_time ) 
+		BIOChipOFF_State::BIOChipOFF_State (Keypad* keypad, EVState* previous_state, EVState* next_state,const char *message, unsigned short int message_len, unsigned short int PIN_len, unsigned long state_creation_time) : EVState( keypad, previous_state, next_state, state_creation_time ) 
 		{
 			m_CurrentTS = millis();
 			
@@ -57,22 +58,26 @@ namespace EVCorporation
 				m_Message[i] = message[i];
 			}
 			
-			m_ErrorState = new TextNTO_State(keypad, nullptr, nullptr, m_CurrentTS, m_ActivationError, 32, 15, false, false);
-			m_ActivatingState = new TextNTO_State(keypad, m_ErrorState, nullptr, m_CurrentTS, m_ActivatingBIOChip, 15, 5, false, false);
 			
-			ActivateBIOChipMenu[0] = m_ActivatingState;
-			ActivateBIOChipMenu[1] = this;
 			
-			m_ActivationMenuState =  new Menu_State(keypad, nullptr, ActivateBIOChipMenu, m_ActivationChoices, m_ActivationKeys, 2, m_ActivateBIOChip,18, millis());
-			m_ActivationMenuState->SetPreviousState(this);
+			
+			m_AlreadyDetachedState = new TextNTO_State(keypad, this, nullptr, m_CurrentTS, m_AlreadyDetachedError, 33, 5, false, false);
+									
+			m_DeactivatingState = new TextNTO_State(keypad, nullptr, nullptr, m_CurrentTS, m_DeactivatingBIOChip, 28, 5, false, false);
+			
+			DeactivateBIOChipMenu[0] = m_DeactivatingState;
+			DeactivateBIOChipMenu[1] = this;
+			
+			m_DeactivationMenuState =  new Menu_State(keypad, nullptr, DeactivateBIOChipMenu, m_DeactivationChoices, m_DeactivationKeys, 2, m_DeactivateBIOChip, 16, millis());
+			m_DeactivationMenuState->SetPreviousState(this);
 			
 			m_BlockedState = new TextNTO_State(keypad, this, nullptr, m_CurrentTS, m_TooManyError, 15, 10, true, false);
-			SetNextState(m_ActivationMenuState);
+			SetNextState(m_DeactivationMenuState);
 			ClearPIN();
 		}
 		
 		
-		EVState* BIOChipON_State::loop()
+		EVState* BIOChipOFF_State::loop()
 		{
 			if ( m_ResetTS ) 
 			{
@@ -99,9 +104,17 @@ namespace EVCorporation
 					
 					pin_checked = BIOM->CheckBIOChipPIN(m_CloneID);
 							Serial.print(pin_checked);			
+							
 					if ( pin_checked ) 
 					{
-						BIOM->EnableBIOChip(m_CloneID);
+						if ( !BIOM->IsEnabled(m_CloneID) ) 
+						{		
+								//already detached
+								m_ResetTS = true;
+								GetDisplay()->clear();
+								m_AlreadyDetachedState->SetStateCreationTimestamp( millis());
+								return m_AlreadyDetachedState;
+						}
 						
 						GetDisplay()->clear();
 						Serial.println("Clone ID Ok");

@@ -30,17 +30,9 @@ namespace EVCorporation
 			
 			if ( button_pressed )
 			{
-				//0 BACK
-				if (button_pressed == '0')
-				{
-					GetDisplay()->clear();
-					return GetPreviousState();
-				}
-				
 				EVState *next_state = GetNextState(button_pressed);
 				
 				if ( next_state == nullptr) {
-					Serial.println("No Nextstate Setted");
 					return this;
 				}
 					

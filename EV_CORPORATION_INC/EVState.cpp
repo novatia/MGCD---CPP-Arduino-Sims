@@ -52,7 +52,6 @@ namespace EVCorporation
 			m_Keypad = keypad;
 		}
 
-
 		EVState::EVState (Keypad* keypad, EVState *previous_state,EVState **next_states,const char **choices,const char *keys,unsigned short int next_states_len, unsigned long state_creation_timestamp)
 		{
 			m_StateCreationTimestamp = state_creation_timestamp;
@@ -74,12 +73,7 @@ namespace EVCorporation
 		{
 			return this;
 		}
-		
-		void EVState::print()
-		{
-		
-		}
-				
+			
 		DisplayManager* EVState::GetDisplay()
 		{
 			return m_DM;
@@ -88,12 +82,6 @@ namespace EVCorporation
 		Keypad* EVState::GetKeypad()
 		{
 			return m_Keypad;
-		}
-		
-		
-		char* EVState::GetStateName()
-		{
-			return new char();
 		}
 		
 		unsigned long EVState::GetStateCreationTimestamp() const
@@ -148,7 +136,8 @@ namespace EVCorporation
 			return m_Choices;
 		}
 		
-		unsigned short int EVState::GetNextStatesCount(){
+		unsigned short int EVState::GetNextStatesCount()
+		{
 			return m_NextStatesLen;
 		}
 	}

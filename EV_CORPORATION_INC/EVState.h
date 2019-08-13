@@ -21,20 +21,16 @@ namespace EVCorporation
 				Keypad* m_Keypad;
 								
 			public:
+				// moved here because crash using Super class calloc
 				~EVState ();
 				EVState ();
 				EVState (Keypad* keypad, EVState* previous_state,unsigned long state_creation_timestamp);
 				EVState (Keypad* keypad, EVState* previous_state,EVState* next_state,unsigned long state_creation_timestamp);
-				
 				EVState (Keypad* keypad, EVState* previous_state,EVState** next_states,const char **choices,const char *keys,unsigned short int next_states_len, unsigned long state_creation_timestamp);
-				
 				
 				EVState (EVState* previous_state,unsigned long state_creation_timestamp);
 				EVState (EVState* previous_state,EVState* next_state,unsigned long state_creation_timestamp);
 				virtual EVState* loop(); //loop interface manage input and route correct state
-				virtual void print();
-				
-				virtual char* GetStateName();
 				
 				unsigned long GetStateCreationTimestamp() const;
 				void SetStateCreationTimestamp(unsigned long int StateCreationTimestamp );

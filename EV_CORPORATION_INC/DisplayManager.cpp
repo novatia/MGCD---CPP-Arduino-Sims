@@ -113,8 +113,8 @@ namespace EVCorporation
 				
 				if ( strlen(message) > 16 )
 				{
-					m_ITDB02_28->print(msg.substring(0,16), CENTER, 80);
-					m_ITDB02_28->print(msg.substring(16), CENTER, 80);
+					m_ITDB02_28->print(msg.substring(0,16), 0, 80);
+					m_ITDB02_28->print(msg.substring(16), 0, 100);
 				}
 				else 
 				{

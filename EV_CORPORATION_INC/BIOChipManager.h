@@ -16,6 +16,7 @@ namespace EVCorporation
 			static BIOChipManager* GetInstance();
 			bool DisableBIOChip(char *PIN);
 			bool EnableBIOChip(char *PIN);
+      bool IsEnabled(char *PIN);
 			void resetBIOChips();
 			bool CheckBIOChipPIN(char *PIN);
 			short int GetBIOChipPINIndex(char *PIN);

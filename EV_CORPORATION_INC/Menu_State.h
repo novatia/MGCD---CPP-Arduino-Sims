@@ -14,7 +14,7 @@ namespace EVCorporation
 				~Menu_State();
 				Menu_State(Keypad* keypad, EVState* previous_state, EVState** next_states,const char **choices,const char* keys, unsigned short int next_states_len, const char *message, unsigned short int message_len ,unsigned long state_creation_time);
 				
-				EVState* loop();
+				EVState* loop() override;
 		};
 	}
 }
