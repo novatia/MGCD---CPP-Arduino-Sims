@@ -1,3 +1,6 @@
+# MGCD---CPP-Arduino-Sims
+
+![alt text](https://github.com/novatia/MGCD---CPP-Arduino-Sims/blob/master/foto.jpg)
 This example shows how to write code with C++11 and Arduino 2650 Board.
 This is a test as part of C++ base course done by Daniele Colombo (Master in Computer Game Development 2019 Università di Verona)
 
